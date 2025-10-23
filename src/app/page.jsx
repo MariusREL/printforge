@@ -7,11 +7,11 @@ export default function Home() {
         <p className="text-[16px] hidden lg:block">
           YOUR GO-TO PLATFORM FOR 3D PRINTING FILES
         </p>
-        <h1 className="font-heading text-[40px] font-bold text-left lg:text-[56px]">
+        <h1 className="font--family-mont text-[40px] font-bold text-left lg:text-[56px]">
           Discover what's possible with 3D printing
         </h1>
 
-        <p className="font-para text-left text-2xl lg:text-[28px]">
+        <p className="font-family-albert text-left text-2xl lg:text-[28px]">
           Join our community of creators and explore a vast library of
           user-submitted models.
         </p>
