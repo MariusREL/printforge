@@ -14,10 +14,10 @@ export default function About(){
                         </Image>
                     </div>
                     <article className="flex flex-col justify-center gap-5 mx-5">
-                        <p className="font-family-albert text-[20px] font-medium">
+                        <p className="font-albert text-[20px] font-medium">
                             ABOUT PRINTFORGE
                         </p>
-                        <h1 className="font-family-mont text-[56px]">
+                        <h1 className="font-mont font-medium text-[56px]">
                             Empowering Makers Worldwide
                         </h1>
                         <p>
