@@ -3,6 +3,7 @@
 @theme inline {
   --font-albert: var(--font-albert);
   --font-mont: var(--font-mont);
+  --border-divider: #dddddd
 }
 body {
   margin: 0;
