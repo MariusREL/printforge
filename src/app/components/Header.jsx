@@ -5,7 +5,7 @@ export default function Header() {
   return (
     <header className='mb-10'>
       <div className='container px-5 md:px-0 py-4 mx-auto'>
-        <nav className='flex justify-between md:px-9'>
+        <nav className='flex justify-between md:px-3'>
           <div className='flex items-center w-5xl'>
             <Link href="/">
               <Image
