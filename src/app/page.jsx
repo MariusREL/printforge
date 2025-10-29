@@ -11,7 +11,7 @@ export default function Home() {
           Discover what's possible with 3D printing
         </h1>
 
-        <p className="font-albert text-left text-2xl lg:text-[28px]">
+        <p className="text-left text-2xl lg:text-[28px]">
           Join our community of creators and explore a vast library of
           user-submitted models.
         </p>

@@ -27,7 +27,7 @@ export default function Header() {
             </Link>
   
           </div>
-          <ul className='flex gap-10 uppercase font-albert text-sm'>
+          <ul className='flex gap-10 uppercase  text-sm'>
             <li>
               <Link href="/models" className='whitespace-nowrap'>
                 3D Models
