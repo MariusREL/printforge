@@ -16,7 +16,6 @@ export const albert_sans = Albert_Sans({
 
 import "./globals.css";
 import Header from "@/app/components/Header.jsx";
-
 export default function RootLayout({ children }) {
   return (
     <html

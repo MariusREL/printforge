@@ -7,7 +7,7 @@ export default function Home() {
         <p className="text-[16px] hidden lg:block">
           YOUR GO-TO PLATFORM FOR 3D PRINTING FILES
         </p>
-        <h1 className="font-mont text-[40px] font-bold text-left lg:text-[56px]">
+        <h1 className="text-[40px] font-bold text-left lg:text-[56px]">
           Discover what's possible with 3D printing
         </h1>
 

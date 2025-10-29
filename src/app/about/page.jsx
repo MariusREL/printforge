@@ -20,7 +20,7 @@ export default function About() {
             <p className="font-albert text-sm font-medium text-zinc-500 uppercase tracking-wide" aria-hidden="true">
               About PrintForge
             </p>
-            <h1 id="about-heading" className="font-mont font-bold text-[40px] lg:text-[50px] leading-tight">
+            <h1 id="about-heading" className="font-bold text-[40px] lg:text-[50px] leading-tight">
               Empowering makers worldwide
             </h1>
             <p className="font-albert text-[18px] lg:text-[20px] text-zinc-700 leading-relaxed">
@@ -39,7 +39,7 @@ export default function About() {
           <h2 id="features-heading" className="sr-only">Key Features</h2>
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:divide-x lg:divide-zinc-200">
             <article className="flex flex-col gap-4 lg:pr-12">
-              <h3 className="font-mont font-bold text-[24px] lg:text-[28px]">
+              <h3 className="font-bold text-[24px] lg:text-[28px]">
                 100K+ Models
               </h3>
               <p className="font-albert text-[16px] lg:text-[18px] text-zinc-600 leading-relaxed">
@@ -48,7 +48,7 @@ export default function About() {
             </article>
             
             <article className="flex flex-col gap-4 lg:px-12">
-              <h3 className="font-mont font-bold text-[24px] lg:text-[28px]">
+              <h3 className="font-bold text-[24px] lg:text-[28px]">
                 Active Community
               </h3>
               <p className="font-albert text-[16px] lg:text-[18px] text-zinc-600 leading-relaxed">
@@ -57,7 +57,7 @@ export default function About() {
             </article>
             
             <article className="flex flex-col gap-4 lg:pl-12">
-              <h3 className="font-mont font-bold text-[24px] lg:text-[28px]">
+              <h3 className="font-bold text-[24px] lg:text-[28px]">
                 Free to Use
               </h3>
               <p className="font-albert text-[16px] lg:text-[18px] text-zinc-600 leading-relaxed">
@@ -72,7 +72,7 @@ export default function About() {
 
       {/* Vision Section */}
       <section className="container max-w-3xl px-5 py-12 mx-auto" aria-labelledby="vision-heading">
-        <h2 id="vision-heading" className="font-mont font-bold text-[40px] lg:text-[50px] mb-8">
+        <h2 id="vision-heading" className="font-bold text-[40px] lg:text-[50px] mb-8">
           Our vision
         </h2>
         
