@@ -22,6 +22,7 @@ export default function Header() {
                 alt="PrintForge logo"
                 width={50}
                 height={50}
+                loading='eager'
                 className='hidden md:block h-8 w-auto'
               />
             </Link>
@@ -29,7 +30,7 @@ export default function Header() {
           </div>
           <ul className='flex gap-10 uppercase  text-sm'>
             <li>
-              <Link href="/models" className='whitespace-nowrap'>
+              <Link href="/3d-models" className='whitespace-nowrap'>
                 3D Models
               </Link>
             </li>
