@@ -18,10 +18,12 @@ export default function ModelCard({ model }) {
                 </div>
                 <div className="p-4">
 
-                    <h2 className="font-bold ">
-                        {model.name}
-                    </h2>
-
+                    <div className="flex justify-between mb-2 min-h-14">
+                        <h2 id={`model-${model.id}-title`} className="text-xl font-semibold text-gray-800 line-clamp-2">
+                            {model.name}
+                        </h2>
+                    </div>
+                    
                     <p className="text-gray-800 text-sm line-clamp-1 min-h-10 leading-5">
                         {model.description}
                     </p>

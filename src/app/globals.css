@@ -1,14 +1,17 @@
 @import 'tailwindcss';
 
 /* stylelint-disable-next-line at-rule-no-unknown */
+:root {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 @theme inline {
   --font-albert: var(--font-albert);
   --font-mont: var(--font-mont);
   --border-divider: #dddddd
 }
 body {
-  margin: 0;
-  padding: 0;
   font-family: var(--font-albert);
 }
 h1, h2, h3, h4, h5, h6{
