@@ -1,4 +1,6 @@
 import { Montserrat_Alternates, Albert_Sans } from "next/font/google";
+import "./globals.css";
+import HeaderSwitch from "@/app/components/HeaderSwitch";
 
 export const montserrat_alternates = Montserrat_Alternates({
   subsets: ["latin"],
@@ -14,8 +16,6 @@ export const albert_sans = Albert_Sans({
   weight: ["400", "500", "700"],
 });
 
-import "./globals.css";
-import Header from "@/app/components/Header.jsx";
 export default function RootLayout({ children }) {
   return (
     <html
@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
       className={`${montserrat_alternates.variable} ${albert_sans.variable} antialiased`}
     >
       <body>
-        <Header />
+        <HeaderSwitch />
         {children}
       </body>
     </html>

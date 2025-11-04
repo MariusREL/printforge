@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function Header() {
+export default function Header( {className = ""}) {
   return (
-    <header className='mb-10'>
+    <header className={`mb-10 ${className}`}>
       <div className='container px-5 md:px-0 py-4 mx-auto'>
         <nav className='flex justify-between md:px-3'>
           <div className='flex items-center w-5xl'>
