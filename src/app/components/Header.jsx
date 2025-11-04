@@ -3,9 +3,9 @@ import Image from 'next/image';
 
 export default function Header( {className = ""}) {
   return (
-    <header className={`mb-10 ${className}`}>
+    <header className={`mb-10 bg-[var(--header-bg)] text-[var(--header-fg)] border-[var(--header-border)] ${className}`}>
       <div className='container px-5 md:px-0 py-4 mx-auto'>
-        <nav className='flex justify-between md:px-3'>
+        <nav className='flex justify-between items-center md:px-3'>
           <div className='flex items-center w-5xl'>
             <Link href="/">
               <Image
@@ -28,7 +28,7 @@ export default function Header( {className = ""}) {
             </Link>
   
           </div>
-          <ul className='flex gap-10 uppercase  text-sm'>
+          <ul className='flex gap-10 uppercase text-sm'>
             <li>
               <Link href="/3d-models" className='whitespace-nowrap'>
                 3D Models

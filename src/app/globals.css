@@ -1,19 +1,44 @@
 @import 'tailwindcss';
 
-/* stylelint-disable-next-line at-rule-no-unknown */
-:root {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+
+:root { color-scheme: light dark; }
+
+
 @theme inline {
   --font-albert: var(--font-albert);
   --font-mont: var(--font-mont);
-  --border-divider: #dddddd
+
+  --bg: #f8fafc;        
+  --fg: #e5e5e5;
+  --heading: #0f172a;
+  --divider: #e5e7eb;
+
+
+  --header-bg: #f8fafc;
+  --header-fg: #111827;
+  --header-border: #e5e7eb;
+
+  --card-bg: #f8fafc;
+  --card-fg: #111827;
+  --card-border: #e5e7eb;
 }
-body {
-  font-family: var(--font-albert);
+
+@media (prefers-color-scheme: dark) {
+  @theme inline {
+    --bg: #0b1220;
+    --fg: #e5e5e5;
+    --heading: #e5e5e5;
+
+    --header-bg: #f3f6fd;  
+    --header-fg: #111827;
+    --header-border: #e5e7eb;
+
+    --card-bg: #0f172a;
+    --card-fg: #e5e7eb;
+    --card-border: #1f2937;
+  }
 }
-h1, h2, h3, h4, h5, h6{
-  font-family: var(--font-mont);
-}
+
+html, body { margin: 0; padding: 0; }
+body { font-family: var(--font-albert); background: var(--bg); color: var(--fg); }
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-mont); color: var(--heading); }

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -15,9 +16,11 @@ export default function Home() {
           Join our community of creators and explore a vast library of
           user-submitted models.
         </p>
-        <button className="border-2 border-black w-49 h-10 mt-10 bg-white hover:bg-gray-100 cursor-pointer font-semibold text-xl ">
-          BROWSE MODELS
-        </button>
+        <Link href="/3d-models">
+          <button className="uppercase border-1 border-[var(--header-bg)] w-49 h-10 mt-10 hover:bg-gray-800 cursor-pointer font-semibold text-xl text-[var(--fg)] ">
+            browse models
+          </button>
+        </Link>
       </div>
       <div className="relative aspect-square  max-w-[600] lg:mt-10">
         <Image
