@@ -7,7 +7,7 @@ export default async function ModelsPage(){
     return (
         <>
         <h1>All Models</h1>
-        <div className="container grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="container grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         
         
         {models.map((model)=> (
