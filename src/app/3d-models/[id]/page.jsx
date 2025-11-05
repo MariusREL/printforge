@@ -13,10 +13,10 @@ export default async function page({params}){
     
     return (
         <>  
-            <div className="container max-w-6xl px-4 py-8 mx-auto">
+            <div className="container max-w-6xl px-4 mx-auto">
                 <BackToOverview className="md:hidden"/>
                 <article className="grid gird-cols-1 gap-8 md:grid-cols-2">
-                    <figure className="relative overflow-hidden rounded-lg shadow-lg aspect-square">
+                    <figure className="relative mt-3 overflow-hidden rounded-lg shadow-lg aspect-square">
                         <Image 
                             src="/placeholder.png"
                             alt="placeholder image"

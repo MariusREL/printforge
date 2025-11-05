@@ -12,7 +12,7 @@ export default function ModelCard({ model }) {
     >
       <div className="overflow-hidden transition-shadow rounded-lg shadow-md hover:shadow-lg bg-[--card-bg] text-[--card-fg] border border-[--card-border]" role="article">
         <div className="relative aspect-square">
-          <img
+          <Image
             src="/placeholder.png"
             alt={model.name}
             className="absolute inset-0 object-cover w-full h-full"
