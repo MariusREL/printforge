@@ -15,6 +15,8 @@ export default function ModelCard({ model }) {
           <Image
             src="/placeholder.png"
             alt={model.name}
+            width={300}
+            height={300}
             className="absolute inset-0 object-cover w-full h-full"
           />
         </div>
