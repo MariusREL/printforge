@@ -1,4 +1,4 @@
-import categories from "@/app/library/categories";
+import categories from "@/app/data/categories";
 
 export function getAllCategories() {
   return categories;
