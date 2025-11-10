@@ -15,11 +15,15 @@ export default async function Categories({ params }) {
     // console.log(modelsFiltered);
 
     return (
-        <div className="container grid grid-cols-10 gap-10">
-            <aside className="col-span-1"><CategoryBar slugs = {allCategories} /></aside>
-            <section className="col-span-9">
+        <div className="container grid grid-cols-1 md:grid-cols-12 gap-10">
+
+            <aside className="md:col-span-2 md:p-10">
+                <div className="md:sticky md:top-1/2 md:-translate-y-1/2"><CategoryBar slugs = {allCategories} /></div>
+            </aside>
+            
+            <section className="md:col-span-10">
                 <ModelsGrid 
-                    title={displayname}
+                    title={displayname} 
                     models={modelsFiltered}
                 />
             </section>
