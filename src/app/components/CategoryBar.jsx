@@ -1,21 +1,28 @@
-import Link from "next/link"
+import Link from "next/link";
 
-export default function CategoryBar({ slugs = [] }){
-    const isArr = Array.isArray(slugs)
-    if (!isArr){
-        return null
-    }
-    return (
-        
-        <div className="flex md:flex-col gap-10 md:gap-5 h-full justify-center">
+export default function CategoryBar({ slugs = [] }) {
+  const isArr = Array.isArray(slugs);
+  if (!isArr) {
+    return null;
+  }
 
-            <Link href="/3d-models"><h1 className="uppercase text-sm">all</h1></Link>
+  return (
+    <nav className="flex flex-col gap-3">
+      {/* "ALL" link */}
+      <Link href="/3d-models" className="uppercase text-sm font-semibold hover:opacity-70 transition">
+        All
+      </Link>
 
-    {slugs.map(slug => {
-       return (
-            <div key={slug}><Link  href={`/3d-models/categories/${slug}`}><p className="uppercase text-sm">{slug}</p></Link></div>
-       )
-    })}
-        </div>
-        )
+      {/* Category links */}
+      {slugs.map(slug => (
+        <Link
+          key={slug}
+          href={`/3d-models/categories/${slug}`}
+          className="uppercase text-sm hover:opacity-70 transition"
+        >
+          {slug}
+        </Link>
+      ))}
+    </nav>
+  );
 }
