@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("3dmodels")]
 public sealed class ModelsController : ControllerBase
 {
     private readonly IModelCatalog _catalog;
