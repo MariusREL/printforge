@@ -14,7 +14,7 @@
 *.sln.docstates
 Folder.DotSettings.user
 /.junie/guidelines.md
-*guidelines.md
+guidelines.md
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
