@@ -7,7 +7,7 @@ export default function CategoryBar({ slugs = [] }) {
   }
 
   return (
-    <nav className="flex flex-col gap-3">
+    <nav className="flex md:flex-col gap-3">
       {/* "ALL" link */}
       <Link href="/3d-models" className="uppercase text-sm font-semibold hover:opacity-70 transition">
         All
