@@ -13,7 +13,8 @@
 *.userosscache
 *.sln.docstates
 Folder.DotSettings.user
-guidelines.md
+/.junie/guidelines.md
+*guidelines.md
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
