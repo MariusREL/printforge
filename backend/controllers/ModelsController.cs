@@ -34,5 +34,13 @@ public sealed class ModelsController : ControllerBase
         var item = _catalog.All.FirstOrDefault(m => m.Id == id);
         return item is null ? NotFound() : Ok(item);
     }
+    
+    [HttpGet("{name}")]
+    // TODO: Keep this route, but potentially add another endpoint for case-insensitive lookup in partial strings in the names category.
+    public ActionResult<ModelItem> GetById(string name)
+    {
+        var item = _catalog.All.FirstOrDefault(m => m.Name == name);
+        return item is null ? NotFound() : Ok(item);
+    }
 
 }
