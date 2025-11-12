@@ -7,9 +7,9 @@ export default function CategoryBar({ slugs = [] }) {
   }
 
   return (
-    <nav className="flex md:flex-col gap-3">
+    <nav className="flex md:flex-col md:overflow-visible overflow-scroll gap-3">
       {/* "ALL" link */}
-      <Link href="/3d-models" className="uppercase text-sm font-semibold hover:opacity-70 transition">
+      <Link href="/3dmodels" className="uppercase text-sm font-semibold hover:opacity-70 transition">
         All
       </Link>
 
@@ -17,8 +17,8 @@ export default function CategoryBar({ slugs = [] }) {
       {slugs.map(slug => (
         <Link
           key={slug}
-          href={`/3d-models/categories/${slug}`}
-          className="uppercase text-sm hover:opacity-70 transition"
+          href={`/3dmodels/categories/${slug}`}
+          className=" uppercase text-sm hover:opacity-70 transition"
         >
           {slug}
         </Link>
