@@ -1,7 +1,4 @@
-using backend; // for AddConfiguredCors extension
 using backend.services;
-using Microsoft.AspNetCore.Mvc;
-using System.IO;
 using backend.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
