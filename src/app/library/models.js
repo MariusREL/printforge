@@ -1,7 +1,8 @@
 import modelsData from "@/app/data/models.json";
 
 export default async function getAllModels() {
-  return modelsData;
+  const res = await fetch("http://localhost:5000/3dmodels");
+  return res.json();
 }
 
 export async function getModelById(id) {
