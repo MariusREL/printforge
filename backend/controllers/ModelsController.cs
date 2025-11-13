@@ -1,5 +1,5 @@
 using backend.models;
-using backend.services;
+using backend.database;
 
 namespace backend.controllers;
 
@@ -8,13 +8,15 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("3dmodels")]
 public sealed class ModelsController : ControllerBase
 {
-    private readonly IModelCatalog _catalog;
-    public ModelsController(IModelCatalog catalog) => _catalog = catalog;
+    private readonly PrintforgeDbContext _db;
+    public ModelsController(PrintforgeDbContext db) => _db = db;
 
     // Enhanced listing endpoint: supports category filter, text query, sorting, and pagination.
     // Returns a paged response with totalCount and items.
@@ -30,7 +32,7 @@ public sealed class ModelsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<ModelItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<object> Get(
+    public async Task<ActionResult<object>> Get(
         [FromQuery] string? category,
         [FromQuery] string? q,
         [FromQuery] int skip = 0,
@@ -57,41 +59,46 @@ public sealed class ModelsController : ControllerBase
         var query = string.IsNullOrWhiteSpace(q) ? null : q!.Trim();
 
         // 2) Base set
-        var enumerable = _catalog.All.AsEnumerable();
+        var queryable = _db.Models.AsQueryable();
 
         // 3) Filters
         if (categoryNorm is not null)
-        {
-            enumerable = enumerable.Where(m => !string.IsNullOrEmpty(m.Category) &&
-                                                string.Equals(m.Category, categoryNorm, StringComparison.OrdinalIgnoreCase));
-        }
+            queryable = queryable.Where(m => m.Category != null && m.Category.Equals(categoryNorm));
 
         if (query is not null)
-        {
-            enumerable = enumerable.Where(m =>
-                (!string.IsNullOrEmpty(m.Name) && m.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                (!string.IsNullOrEmpty(m.Description) && m.Description.Contains(query, StringComparison.OrdinalIgnoreCase))
-            );
-        }
+            queryable = queryable.Where(m =>
+                (m.Name != null && EF.Functions.Like(m.Name, $"%{query}%")) ||
+                (m.Description != null && EF.Functions.Like(m.Description, $"%{query}%")));
 
         // 4) Total before paging
-        var totalCount = enumerable.Count();
+        var totalCount = await queryable.CountAsync();
 
         // 5) Sorting
-        enumerable = sort switch
+        queryable = sort switch
         {
-            "likes" => SortByLikes(enumerable, isDesc),
-            "date"  => isDesc
-                ? enumerable.OrderByDescending(m => m.DateAdded)
-                : enumerable.OrderBy(m => m.DateAdded),
-            "name"  => isDesc
-                ? enumerable.OrderByDescending(m => m.Name, StringComparer.OrdinalIgnoreCase)
-                : enumerable.OrderBy(m => m.Name, StringComparer.OrdinalIgnoreCase),
-            _ => SortByLikes(enumerable, isDesc)
+            "likes" => isDesc ? queryable.OrderByDescending(m => m.Likes)
+                               : queryable.OrderBy(m => m.Likes),
+            "date"  => isDesc ? queryable.OrderByDescending(m => m.DateAdded)
+                               : queryable.OrderBy(m => m.DateAdded),
+            "name"  => isDesc ? queryable.OrderByDescending(m => m.Name)
+                               : queryable.OrderBy(m => m.Name),
+            _ => isDesc ? queryable.OrderByDescending(m => m.Likes)
+                        : queryable.OrderBy(m => m.Likes)
         };
 
         // 6) Pagination
-        var page = enumerable.Skip(skip).Take(take).ToList();
+        var page = await queryable.Skip(skip).Take(take)
+                                  .Select(m => new ModelItem
+                                  {
+                                      Id = m.Id,
+                                      Name = m.Name,
+                                      Description = m.Description,
+                                      Likes = m.Likes,
+                                      Image = m.Image,
+                                      Category = m.Category,
+                                      DateAdded = m.DateAdded
+                                  })
+                                  .ToListAsync();
 
         // 7) Response
         var result = new PagedResult<ModelItem>(totalCount, page);
@@ -104,14 +111,24 @@ public sealed class ModelsController : ControllerBase
                 : items.OrderBy(m => m.Likes);
 
     [HttpGet("{id:int}")]
-    public ActionResult<ModelItem> GetById(int id)
+    public async Task<ActionResult<ModelItem>> GetById(int id)
     {
-        var item = _catalog.All.FirstOrDefault(m => m.Id == id);
+        var m = await _db.Models.FirstOrDefaultAsync(x => x.Id == id);
+        var item = m is null ? null : new ModelItem
+        {
+            Id = m.Id,
+            Name = m.Name,
+            Description = m.Description,
+            Likes = m.Likes,
+            Image = m.Image,
+            Category = m.Category,
+            DateAdded = m.DateAdded
+        };
         return item is null ? NotFound() : Ok(item);
     }
     
     [HttpGet("{name}")]
-    public ActionResult<ModelItem> GetById(string name)
+    public async Task<ActionResult<ModelItem>> GetById(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -121,9 +138,21 @@ public sealed class ModelsController : ControllerBase
         var q = name.Trim();
 
         // Case-insensitive partial match: returns the first matching item
-        var item = _catalog.All
-            .FirstOrDefault(m => !string.IsNullOrEmpty(m.Name) &&
-                                 m.Name.Contains(q, StringComparison.OrdinalIgnoreCase));
+        var m = await _db.Models
+            .Where(m => m.Name != null && m.Name.Contains(q))
+            .OrderBy(m => m.Name)
+            .FirstOrDefaultAsync();
+
+        var item = m is null ? null : new ModelItem
+        {
+            Id = m.Id,
+            Name = m.Name,
+            Description = m.Description,
+            Likes = m.Likes,
+            Image = m.Image,
+            Category = m.Category,
+            DateAdded = m.DateAdded
+        };
 
         return item is null ? NotFound() : Ok(item);
     }
@@ -133,25 +162,94 @@ public sealed class ModelsController : ControllerBase
     //          GET /3dmodels/categories?query=ed -> ["education", ...]
     [HttpGet("categories")]
     [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
-    public ActionResult<IEnumerable<string>> GetCategories([FromQuery] string? query)
+    public async Task<ActionResult<IEnumerable<string>>> GetCategories([FromQuery] string? query)
     {
-        var categories = _catalog.All
-            .Select(m => m.Category)
-            .Where(c => !string.IsNullOrWhiteSpace(c))
-            .Select(c => c!.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .AsEnumerable();
+        var q = string.IsNullOrWhiteSpace(query) ? null : query.Trim();
+        var categoriesQuery = _db.Models
+            .Where(m => m.Category != null)
+            .Select(m => m.Category!)
+            .Distinct();
 
-        if (!string.IsNullOrWhiteSpace(query))
-        {
-            var q = query.Trim();
-            categories = categories.Where(c => c.Contains(q, StringComparison.OrdinalIgnoreCase));
-        }
+        if (q is not null)
+            categoriesQuery = categoriesQuery.Where(c => c.Contains(q));
 
-        var result = categories
-            .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
+        var result = await categoriesQuery.OrderBy(c => c).ToListAsync();
         return Ok(result);
+    }
+
+    // Upload a new model with STL file
+    // multipart/form-data fields: name, description, image (optional URL), category, dateAdded (optional ISO), stl (file)
+    [HttpPost]
+    [RequestSizeLimit(100_000_000)]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<ModelItem>> Create([FromForm] string name,
+                                                      [FromForm] string description,
+                                                      [FromForm] string? image,
+                                                      [FromForm] string category,
+                                                      [FromForm] DateTime? dateAdded,
+                                                      [FromForm] IFormFile stl)
+    {
+        if (stl is null || stl.Length == 0)
+            return BadRequest("STL file is required.");
+
+        var record = new ModelRecord
+        {
+            Name = name,
+            Description = description,
+            Image = image ?? string.Empty,
+            Category = category,
+            DateAdded = dateAdded ?? DateTime.UtcNow,
+            Likes = 0
+        };
+
+        await _db.Models.AddAsync(record);
+        await _db.SaveChangesAsync();
+
+        await using var ms = new MemoryStream();
+        await stl.CopyToAsync(ms);
+        var blob = new ModelStlBlob
+        {
+            ModelId = record.Id,
+            FileName = string.IsNullOrWhiteSpace(stl.FileName) ? $"model-{record.Id}.stl" : stl.FileName,
+            ContentType = string.IsNullOrWhiteSpace(stl.ContentType) ? "application/sla" : stl.ContentType,
+            Data = ms.ToArray()
+        };
+        await _db.ModelStlBlobs.AddAsync(blob);
+        await _db.SaveChangesAsync();
+
+        var result = new ModelItem
+        {
+            Id = record.Id,
+            Name = record.Name,
+            Description = record.Description,
+            Likes = record.Likes,
+            Image = record.Image,
+            Category = record.Category,
+            DateAdded = record.DateAdded
+        };
+
+        return CreatedAtAction(nameof(GetById), new { id = record.Id }, result);
+    }
+
+    // Increment like count
+    [HttpPost("{id:int}/like")]
+    public async Task<IActionResult> Like(int id)
+    {
+        var model = await _db.Models.FirstOrDefaultAsync(m => m.Id == id);
+        if (model is null) return NotFound();
+        model.Likes += 1;
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
+
+    // Download the first STL file for a model
+    [HttpGet("{id:int}/stl")]
+    public async Task<IActionResult> DownloadStl(int id)
+    {
+        var blob = await _db.ModelStlBlobs.Where(b => b.ModelId == id)
+                                          .OrderBy(b => b.Id)
+                                          .FirstOrDefaultAsync();
+        if (blob is null) return NotFound();
+        return File(blob.Data, blob.ContentType, blob.FileName);
     }
 }
