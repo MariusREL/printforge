@@ -5,10 +5,10 @@ export default function ModelsPageWrapper({ children }) {
   const slugs = getAllCategories().map(c => c.slug);
 
   return (
-    <div className="container mx-auto px-4 lg:px-8 py-8 grid gap-8 grid-cols-1 md:grid-cols-10">
+    <div className="container mx-auto px-4 py-8 grid gap-8 grid-cols-1 md:grid-cols-10">
       {/* Sidebar on the left */}
-      <aside className="lg:col-span-1">
-        <div className="sticky top-1/2  md:-translate-y-2/5 ">
+      <aside className="col-span-10 md:col-span-1">
+        <div className="sticky top-1/2 md:-translate-y-2/5 ">
           <CategoryBar slugs={slugs} />
         </div>
       </aside>
