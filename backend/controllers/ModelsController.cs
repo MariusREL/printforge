@@ -4,6 +4,7 @@ using backend.services;
 namespace backend.controllers;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,11 +37,48 @@ public sealed class ModelsController : ControllerBase
     }
     
     [HttpGet("{name}")]
-    // TODO: Keep this route, but potentially add another endpoint for case-insensitive lookup in partial strings in the names category.
     public ActionResult<ModelItem> GetById(string name)
     {
-        var item = _catalog.All.FirstOrDefault(m => m.Name == name);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return BadRequest("Name must be provided.");
+        }
+
+        var q = name.Trim();
+
+        // Case-insensitive partial match: returns the first matching item
+        var item = _catalog.All
+            .FirstOrDefault(m => !string.IsNullOrEmpty(m.Name) &&
+                                 m.Name.Contains(q, StringComparison.OrdinalIgnoreCase));
+
         return item is null ? NotFound() : Ok(item);
+    }
+    
+    // Lists all category names (distinct, case-insensitive). Supports optional filtering by partial, case-insensitive search.
+    // Example: GET /3dmodels/categories          -> ["art", "education", ...]
+    //          GET /3dmodels/categories?query=ed -> ["education", ...]
+    [HttpGet("categories")]
+    [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+    public ActionResult<IEnumerable<string>> GetCategories([FromQuery] string? query)
+    {
+        var categories = _catalog.All
+            .Select(m => m.Category)
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Select(c => c!.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var q = query.Trim();
+            categories = categories.Where(c => c.Contains(q, StringComparison.OrdinalIgnoreCase));
+        }
+
+        var result = categories
+            .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return Ok(result);
     }
 
 }
