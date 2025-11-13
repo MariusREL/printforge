@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "dev:all": "concurrently \"cd backend && \" \"dotnet runnpm run dev\"",
+    "dev:all": "concurrently \"cd backend && dotnet run\" \"npm run dev\"",
     "lint": "eslint"
   },
   "dependencies": {

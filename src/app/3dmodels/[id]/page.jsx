@@ -4,11 +4,19 @@ import Image from "next/image"
 import { FaRegHeart } from "react-icons/fa6"
 import Pill from "@/app/components/Pill"
 import BackToOverview from "@/app/components/BackToOverview"
+import { notFound } from 'next/navigation';
+
 export default async function page({params}){
     
     const {id} = await params
-    console.log(await getModelById(id));
-    const { category, dateAdded, description, id: ObjId, image, likes, name} = await getModelById(id)
+    const model = await getModelById(id);
+
+    // If no model is found, show the 404 page
+    if (!model) {
+        notFound();
+    }
+
+    const { category, dateAdded, description, id: ObjId, image, likes, name} = model
     
     
     return (

@@ -5,31 +5,57 @@ const BACKEND =
   process.env.NEXT_PUBLIC_API_URL ??
   "http://localhost:5000";
 
-export default async function getAllModels() {
+// The function now accepts an optional 'category'
+export default async function getAllModels({ category } = {}) {
   try {
-    const url = `${BACKEND.replace(/\/$/, "")}/3dmodels`;
+    // Build the URL. If a category is provided, add it as a query parameter.
+    const baseUrl = `${BACKEND.replace(/\/$/, "")}/3dmodels`;
+    const url = category
+      ? `${baseUrl}?category=${encodeURIComponent(category)}`
+      : baseUrl;
+
     const res = await fetch(url, { cache: "no-store" });
 
     if (!res.ok) {
-      console.error(`API responded with status ${res.status}`);
-      // return modelsData;
+      console.error(`API Error: ${res.status}`);
+      // Fallback to local data if API fails
+      const models = category
+        ? modelsData.filter(
+            (m) => m.category.toLowerCase() === category.toLowerCase()
+          )
+        : modelsData;
+      return { items: models };
     }
 
-    // Guard against empty response body which causes JSON.parse errors
-    const text = await res.text();
-    // if (!text) return modelsData;
-
-    return JSON.parse(text);
+    return res.json(); // API returns { totalCount, items }
   } catch (error) {
-    console.error("Error fetching models:", error);
-    // return modelsData;
+    console.error("Fetch Error:", error);
+    // Fallback on network error
+    const models = category
+      ? modelsData.filter(
+          (m) => m.category.toLowerCase() === category.toLowerCase()
+        )
+      : modelsData;
+    return { items: models };
   }
 }
 
 export async function getModelById(id) {
-  const models = await getAllModels();
-  const foundModel = models.find(
-    (model) => model.id.toString() === id.toString()
-  );
-  return foundModel;
+  try {
+    // Fetch a single model directly from the API
+    const url = `${BACKEND.replace(/\/$/, "")}/3dmodels/${id}`;
+    const res = await fetch(url, { cache: "no-store" });
+
+    if (!res.ok) {
+      // If API fails (e.g., 404 Not Found), try the local fallback
+      console.error(`API Error for model ${id}: ${res.status}`);
+      return modelsData.find((model) => model.id.toString() === id.toString());
+    }
+
+    return res.json();
+  } catch (error) {
+    // On network error, try the local fallback
+    console.error(`Fetch Error for model ${id}:`, error);
+    return modelsData.find((model) => model.id.toString() === id.toString());
+  }
 }

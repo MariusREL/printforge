@@ -4,7 +4,6 @@ import { getAllCategories } from "@/app/library/categories";
 export default async function ModelsPageWrapper({ children }) {
   const data = await getAllCategories()
   const slugs = data.map(c => c.category);
-  console.log(slugs);
 
   return (
     <div className="container mx-auto px-4 py-8 grid gap-8 grid-cols-1 md:grid-cols-10">

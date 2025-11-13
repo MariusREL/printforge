@@ -1,11 +1,12 @@
-import getAllModels from "@/app/library/models";
-import ModelsGrid from "../components/ModelsGrid";
+import ModelsGrid from "@/app/components/ModelsGrid.jsx";
+import getAllModels from "@/app/library/models.js";
 
+export default async function ModelsPage() {
+  // getAllModels() returns an object like { items: [...] }
+  const modelsResponse = await getAllModels();
 
+  // Extract the 'items' array from the response object
+  const models = modelsResponse.items || [];
 
-export default async function ModelsPage(){
-    const models = await getAllModels()
-    return (
-        <ModelsGrid title="3D Models" models={models}/>
-        )
+  return <ModelsGrid title="All Models" models={models} />;
 }

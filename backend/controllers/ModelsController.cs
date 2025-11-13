@@ -19,7 +19,7 @@ public sealed class ModelsController : ControllerBase
     // Enhanced listing endpoint: supports category filter, text query, sorting, and pagination.
     // Returns a paged response with totalCount and items.
     private sealed record PagedResult<T>(int TotalCount, List<T> Items);
-    
+
     // ## Usage examples
     /*- First page (default sort):
     - `GET https://localhost:5001/3dmodels?skip=0&take=24`
@@ -81,10 +81,10 @@ public sealed class ModelsController : ControllerBase
         enumerable = sort switch
         {
             "likes" => SortByLikes(enumerable, isDesc),
-            "date"  => isDesc
+            "date" => isDesc
                 ? enumerable.OrderByDescending(m => m.DateAdded)
                 : enumerable.OrderBy(m => m.DateAdded),
-            "name"  => isDesc
+            "name" => isDesc
                 ? enumerable.OrderByDescending(m => m.Name, StringComparer.OrdinalIgnoreCase)
                 : enumerable.OrderBy(m => m.Name, StringComparer.OrdinalIgnoreCase),
             _ => SortByLikes(enumerable, isDesc)
@@ -109,7 +109,7 @@ public sealed class ModelsController : ControllerBase
         var item = _catalog.All.FirstOrDefault(m => m.Id == id);
         return item is null ? NotFound() : Ok(item);
     }
-    
+
     [HttpGet("{name}")]
     public ActionResult<ModelItem> GetById(string name)
     {
@@ -127,7 +127,7 @@ public sealed class ModelsController : ControllerBase
 
         return item is null ? NotFound() : Ok(item);
     }
-    
+
     // Lists all category names (distinct, case-insensitive). Supports optional filtering by partial, case-insensitive search.
     // Example: GET /3dmodels/categories          -> ["art", "education", ...]
     //          GET /3dmodels/categories?query=ed -> ["education", ...]

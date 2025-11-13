@@ -28,20 +28,20 @@ export async function getAllCategories() {
     return apiCategories;
   }
   // Fallback: derive names from local meta
-  return categoriesMeta
+  return categoriesStatic
     .map((c) => c.name || c.slug)
     .filter((v) => typeof v === "string" && v.trim().length > 0);
 }
 // Local meta lookup (still needed for slug/displayName until API supplies them)
-export function getCategoryMetaBySlug(slug) {
+export async function getCategoryMetaBySlug(slug) {
   if (!slug) return null;
-  return categoriesMeta.find((c) => c.slug === slug) || null;
+  return categoriesStatic.find((c) => c.slug === slug) || null;
 }
 
-export function getCategoryMetaByName(name) {
+export async function getCategoryMetaByName(name) {
   if (!name) return null;
   return (
-    categoriesMeta.find(
+    categoriesStatic.find(
       (c) =>
         c.name?.toLowerCase() === name.toLowerCase() ||
         c.slug?.toLowerCase() === name.toLowerCase()
