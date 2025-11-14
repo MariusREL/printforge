@@ -1,14 +1,15 @@
 import CategoryBar from "@/app/components/CategoryBar";
 import { getAllCategories } from "@/app/library/categories";
 
-export default function ModelsPageWrapper({ children }) {
-  const slugs = getAllCategories().map(c => c.slug);
+export default async function ModelsPageWrapper({ children }) {
+  const data = await getAllCategories()
+  const slugs = data.map(c => c.category);
 
   return (
     <div className="container mx-auto px-4 py-8 grid gap-8 grid-cols-1 md:grid-cols-10">
       {/* Sidebar on the left */}
       <aside className="col-span-10 md:col-span-1">
-        <div className="sticky top-1/2 md:-translate-y-2/5 ">
+        <div className="sticky top-10 md:mt-[50%]">
           <CategoryBar slugs={slugs} />
         </div>
       </aside>

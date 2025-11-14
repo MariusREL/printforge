@@ -1,14 +1,17 @@
-import { getCategoryBySlug, getDisplayNameFromSlug } from "@/app/library/categories.js";
+import { getDisplayNameFromSlug } from "@/app/library/categories.js";
 import ModelsGrid from "@/app/components/ModelsGrid.jsx";
 import getAllModels from "@/app/library/models.js";
 
 export default async function Categories({ params }) {
   const { categoryName } = await params;
-  const displayname = getDisplayNameFromSlug(categoryName);
-  const categorySlug = getCategoryBySlug(categoryName);
-  const allModels = await getAllModels();
 
-  const modelsFiltered = allModels.filter(m => m.category === categorySlug.slug);
+  // Ask the API for the display name and the pre-filtered models
+  const displayName = await getDisplayNameFromSlug(categoryName);
+  const modelsResponse = await getAllModels({ category: categoryName });
 
-  return <ModelsGrid title={displayname} models={modelsFiltered} />;
+  // The API and fallback return an object like { items: [...] }
+  const models = modelsResponse.items || [];
+
+  // No more .filter() needed! The backend did the work.
+  return <ModelsGrid title={displayName} models={models} />;
 }

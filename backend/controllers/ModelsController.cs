@@ -33,8 +33,13 @@ public sealed class ModelsController : ControllerBase
 
     // Enhanced listing endpoint: supports category filter, text query, sorting, and pagination.
     // Returns a paged response with totalCount and items.
+<<<<<<< HEAD
     // PagedResult<T> moved to backend/models/PagedResult.cs
     
+=======
+    private sealed record PagedResult<T>(int TotalCount, List<T> Items);
+
+>>>>>>> origin/main
     // ## Usage examples
     /*- First page (default sort):
     - `GET https://localhost:5001/3dmodels?skip=0&take=24`
@@ -63,6 +68,38 @@ public sealed class ModelsController : ControllerBase
             Order = order
         }, HttpContext.RequestAborted);
 
+<<<<<<< HEAD
+=======
+        if (query is not null)
+        {
+            enumerable = enumerable.Where(m =>
+                (!string.IsNullOrEmpty(m.Name) && m.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(m.Description) && m.Description.Contains(query, StringComparison.OrdinalIgnoreCase))
+            );
+        }
+
+        // 4) Total before paging
+        var totalCount = enumerable.Count();
+
+        // 5) Sorting
+        enumerable = sort switch
+        {
+            "likes" => SortByLikes(enumerable, isDesc),
+            "date" => isDesc
+                ? enumerable.OrderByDescending(m => m.DateAdded)
+                : enumerable.OrderBy(m => m.DateAdded),
+            "name" => isDesc
+                ? enumerable.OrderByDescending(m => m.Name, StringComparer.OrdinalIgnoreCase)
+                : enumerable.OrderBy(m => m.Name, StringComparer.OrdinalIgnoreCase),
+            _ => SortByLikes(enumerable, isDesc)
+        };
+
+        // 6) Pagination
+        var page = enumerable.Skip(skip).Take(take).ToList();
+
+        // 7) Response
+        var result = new PagedResult<ModelItem>(totalCount, page);
+>>>>>>> origin/main
         return Ok(result);
     }
 
@@ -87,7 +124,7 @@ public sealed class ModelsController : ControllerBase
         };
         return item is null ? NotFound() : Ok(item);
     }
-    
+
     [HttpGet("{name}")]
     public async Task<ActionResult<ModelItem>> GetById(string name)
     {
@@ -117,7 +154,7 @@ public sealed class ModelsController : ControllerBase
 
         return item is null ? NotFound() : Ok(item);
     }
-    
+
     // Lists all category names (distinct, case-insensitive). Supports optional filtering by partial, case-insensitive search.
     // Example: GET /3dmodels/categories          -> ["art", "education", ...]
     //          GET /3dmodels/categories?query=ed -> ["education", ...]

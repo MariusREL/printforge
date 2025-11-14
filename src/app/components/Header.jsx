@@ -30,7 +30,7 @@ export default function Header( {className = ""}) {
           </div>
           <ul className='flex gap-10 uppercase text-sm'>
             <li>
-              <Link href="/3d-models" className='whitespace-nowrap'>
+              <Link href="/3dmodels" className='whitespace-nowrap'>
                 3D Models
               </Link>
             </li>

@@ -16,7 +16,7 @@ export default function Home() {
           Join our community of creators and explore a vast library of
           user-submitted models.
         </p>
-        <Link href="/3d-models">
+        <Link href="/3dmodels">
           <button className="uppercase border-1 border-[var(--header-bg)] w-49 h-10 mt-10 hover:bg-gray-800 cursor-pointer font-semibold text-xl text-[var(--fg)] ">
             browse models
           </button>

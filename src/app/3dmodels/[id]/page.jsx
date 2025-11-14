@@ -1,14 +1,21 @@
 import { getModelById } from "@/app/library/models"
-import Link from "next/link"
 import Image from "next/image"
 import { FaRegHeart } from "react-icons/fa6"
 import Pill from "@/app/components/Pill"
 import BackToOverview from "@/app/components/BackToOverview"
+import { notFound } from 'next/navigation';
+
 export default async function page({params}){
     
     const {id} = await params
-    console.log(await getModelById(id));
-    const { category, dateAdded, description, id: ObjId, image, likes, name} = await getModelById(id)
+    const model = await getModelById(id);
+
+    // If no model is found, show the 404 page
+    if (!model) {
+        notFound();
+    }
+
+    const { category, dateAdded, description, id: ObjId, image, likes, name} = model
     
     
     return (
@@ -18,11 +25,11 @@ export default async function page({params}){
                 <article className="grid gird-cols-1 gap-2 md:gap-8 md:grid-cols-2">
                     <figure className="relative mt-3 overflow-hidden rounded-lg shadow-lg aspect-square">
                         <Image 
-                            src="/placeholder.png"
+                            src="/cat.webp"
                             alt="placeholder image"
                             width={300}
                             height={300}
-                            className="absolute inset-0 object-cover w-full h-full"
+                            className="animate-spin absolute inset-0 object-cover w-full h-full"
                             ></Image>
                     </figure>
 
