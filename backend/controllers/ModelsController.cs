@@ -1,4 +1,5 @@
 using backend.models;
+using backend.database;
 using backend.services;
 
 namespace backend.controllers;
@@ -8,18 +9,32 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("3dmodels")]
 public sealed class ModelsController : ControllerBase
 {
-    private readonly IModelCatalog _catalog;
-    public ModelsController(IModelCatalog catalog) => _catalog = catalog;
+    private readonly PrintforgeDbContext _db;
+    private readonly backend.services.ILikesService _likes;
+    private readonly backend.services.ILikeRateLimiter _limiter;
+    private readonly IModelsQueryService _modelsQuery;
+    public ModelsController(PrintforgeDbContext db,
+                            backend.services.ILikesService likes,
+                            backend.services.ILikeRateLimiter limiter,
+                            IModelsQueryService modelsQuery)
+    {
+        _db = db;
+        _likes = likes;
+        _limiter = limiter;
+        _modelsQuery = modelsQuery;
+    }
 
     // Enhanced listing endpoint: supports category filter, text query, sorting, and pagination.
     // Returns a paged response with totalCount and items.
-    private sealed record PagedResult<T>(int TotalCount, List<T> Items);
-
+    // PagedResult<T> moved to backend/models/PagedResult.cs
+    
     // ## Usage examples
     /*- First page (default sort):
     - `GET https://localhost:5001/3dmodels?skip=0&take=24`
@@ -30,7 +45,7 @@ public sealed class ModelsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<ModelItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<object> Get(
+    public async Task<ActionResult<PagedResult<ModelItem>>> Get(
         [FromQuery] string? category,
         [FromQuery] string? q,
         [FromQuery] int skip = 0,
@@ -38,63 +53,16 @@ public sealed class ModelsController : ControllerBase
         [FromQuery] string sort = "likes",
         [FromQuery] string order = "desc")
     {
-        // 1) Validate and normalize inputs
-        if (skip < 0) return BadRequest("Parameter 'skip' must be >= 0.");
-        if (take < 0) return BadRequest("Parameter 'take' must be >= 0.");
-        const int maxTake = 100;
-        if (take > maxTake) take = maxTake;
-
-        sort = (sort ?? "likes").Trim().ToLowerInvariant();
-        order = (order ?? "desc").Trim().ToLowerInvariant();
-        var isDesc = order == "desc";
-
-        bool IsValidSort(string s) => s is "likes" or "date" or "name";
-        bool IsValidOrder(string s) => s is "asc" or "desc";
-        if (!IsValidSort(sort)) return BadRequest("Parameter 'sort' must be one of: likes, date, name.");
-        if (!IsValidOrder(order)) return BadRequest("Parameter 'order' must be one of: asc, desc.");
-
-        var categoryNorm = string.IsNullOrWhiteSpace(category) ? null : category!.Trim();
-        var query = string.IsNullOrWhiteSpace(q) ? null : q!.Trim();
-
-        // 2) Base set
-        var enumerable = _catalog.All.AsEnumerable();
-
-        // 3) Filters
-        if (categoryNorm is not null)
+        var result = await _modelsQuery.BrowseAsync(new BrowseQuery
         {
-            enumerable = enumerable.Where(m => !string.IsNullOrEmpty(m.Category) &&
-                                                string.Equals(m.Category, categoryNorm, StringComparison.OrdinalIgnoreCase));
-        }
+            Category = category,
+            Q = q,
+            Skip = skip,
+            Take = take,
+            Sort = sort,
+            Order = order
+        }, HttpContext.RequestAborted);
 
-        if (query is not null)
-        {
-            enumerable = enumerable.Where(m =>
-                (!string.IsNullOrEmpty(m.Name) && m.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                (!string.IsNullOrEmpty(m.Description) && m.Description.Contains(query, StringComparison.OrdinalIgnoreCase))
-            );
-        }
-
-        // 4) Total before paging
-        var totalCount = enumerable.Count();
-
-        // 5) Sorting
-        enumerable = sort switch
-        {
-            "likes" => SortByLikes(enumerable, isDesc),
-            "date" => isDesc
-                ? enumerable.OrderByDescending(m => m.DateAdded)
-                : enumerable.OrderBy(m => m.DateAdded),
-            "name" => isDesc
-                ? enumerable.OrderByDescending(m => m.Name, StringComparer.OrdinalIgnoreCase)
-                : enumerable.OrderBy(m => m.Name, StringComparer.OrdinalIgnoreCase),
-            _ => SortByLikes(enumerable, isDesc)
-        };
-
-        // 6) Pagination
-        var page = enumerable.Skip(skip).Take(take).ToList();
-
-        // 7) Response
-        var result = new PagedResult<ModelItem>(totalCount, page);
         return Ok(result);
     }
 
@@ -104,14 +72,24 @@ public sealed class ModelsController : ControllerBase
                 : items.OrderBy(m => m.Likes);
 
     [HttpGet("{id:int}")]
-    public ActionResult<ModelItem> GetById(int id)
+    public async Task<ActionResult<ModelItem>> GetById(int id)
     {
-        var item = _catalog.All.FirstOrDefault(m => m.Id == id);
+        var m = await _db.Models.FirstOrDefaultAsync(x => x.Id == id);
+        var item = m is null ? null : new ModelItem
+        {
+            Id = m.Id,
+            Name = m.Name,
+            Description = m.Description,
+            Likes = m.Likes,
+            Image = m.Image,
+            Category = m.Category,
+            DateAdded = m.DateAdded
+        };
         return item is null ? NotFound() : Ok(item);
     }
-
+    
     [HttpGet("{name}")]
-    public ActionResult<ModelItem> GetById(string name)
+    public async Task<ActionResult<ModelItem>> GetById(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -121,37 +99,76 @@ public sealed class ModelsController : ControllerBase
         var q = name.Trim();
 
         // Case-insensitive partial match: returns the first matching item
-        var item = _catalog.All
-            .FirstOrDefault(m => !string.IsNullOrEmpty(m.Name) &&
-                                 m.Name.Contains(q, StringComparison.OrdinalIgnoreCase));
+        var m = await _db.Models
+            .Where(m => m.Name != null && m.Name.Contains(q))
+            .OrderBy(m => m.Name)
+            .FirstOrDefaultAsync();
+
+        var item = m is null ? null : new ModelItem
+        {
+            Id = m.Id,
+            Name = m.Name,
+            Description = m.Description,
+            Likes = m.Likes,
+            Image = m.Image,
+            Category = m.Category,
+            DateAdded = m.DateAdded
+        };
 
         return item is null ? NotFound() : Ok(item);
     }
-
+    
     // Lists all category names (distinct, case-insensitive). Supports optional filtering by partial, case-insensitive search.
     // Example: GET /3dmodels/categories          -> ["art", "education", ...]
     //          GET /3dmodels/categories?query=ed -> ["education", ...]
     [HttpGet("categories")]
     [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
-    public ActionResult<IEnumerable<string>> GetCategories([FromQuery] string? query)
+    public async Task<ActionResult<IEnumerable<string>>> GetCategories([FromQuery] string? query)
     {
-        var categories = _catalog.All
-            .Select(m => m.Category)
-            .Where(c => !string.IsNullOrWhiteSpace(c))
-            .Select(c => c!.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .AsEnumerable();
+        var q = string.IsNullOrWhiteSpace(query) ? null : query.Trim();
+        var categoriesQuery = _db.Models
+            .Where(m => m.Category != null)
+            .Select(m => m.Category!)
+            .Distinct();
 
-        if (!string.IsNullOrWhiteSpace(query))
+        if (q is not null)
+            categoriesQuery = categoriesQuery.Where(c => c.Contains(q));
+
+        var result = await categoriesQuery.OrderBy(c => c).ToListAsync();
+        return Ok(result);
+    }
+
+    // Uploads are disabled; return 410 Gone to signal deprecation
+    [HttpPost]
+    public IActionResult Create()
+    {
+        return StatusCode(StatusCodes.Status410Gone, "Uploads are disabled in this environment.");
+    }
+
+    // Increment like count (with per-client rate limiting)
+    [HttpPost("{id:int}/like")]
+    public async Task<IActionResult> Like(int id)
+    {
+        if (!_limiter.TryAcquire(HttpContext, out var retryAfter))
         {
-            var q = query.Trim();
-            categories = categories.Where(c => c.Contains(q, StringComparison.OrdinalIgnoreCase));
+            // 429 Too Many Requests with Retry-After header (in seconds)
+            Response.Headers["Retry-After"] = Math.Ceiling(retryAfter.TotalSeconds).ToString();
+            return StatusCode(StatusCodes.Status429TooManyRequests, $"Rate limit exceeded. Retry after {retryAfter.TotalMilliseconds:F0} ms");
         }
 
-        var result = categories
-            .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        var ok = await _likes.IncrementAsync(id, HttpContext.RequestAborted);
+        if (!ok) return NotFound();
+        return NoContent();
+    }
 
-        return Ok(result);
+    // Return the first WebP thumbnail for a model
+    [HttpGet("{id:int}/thumbnail")]
+    public async Task<IActionResult> GetThumbnail(int id)
+    {
+        var webp = await _db.ModelWebpPlaceholders.Where(b => b.ModelId == id)
+                                                  .OrderBy(b => b.Id)
+                                                  .FirstOrDefaultAsync();
+        if (webp is null) return NotFound();
+        return File(webp.Data, webp.ContentType, webp.FileName);
     }
 }
