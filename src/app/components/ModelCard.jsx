@@ -20,7 +20,7 @@ const SPIN_CLASSES = [
 ];
 
 export default function ModelCard({ model }) {
-  const [spinClass, setSpinClass] = useState("spin-5"); // default mid-speed
+  const [spinClass, setSpinClass] = useState("spin-5");
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * SPIN_CLASSES.length);
@@ -47,7 +47,7 @@ export default function ModelCard({ model }) {
           />
         </div>
         <div className="p-4">
-          <div className="flex justify-between min-h-[3rem]">
+          <div className="flex justify-between min-h-12">
             <h2
               id={`model-${model.id}-title`}
               className="text-xl font-semibold line-clamp-2"
@@ -55,7 +55,7 @@ export default function ModelCard({ model }) {
               {model.name}
             </h2>
           </div>
-          <p className="text-sm line-clamp-2 min-h-[2.5rem] leading-[1.25rem] opacity-90">
+          <p className="text-sm line-clamp-2 min-h-10 leading-5 opacity-90">
             {model.description}
           </p>
           <div className="mt-2">
