@@ -26,8 +26,9 @@ export default async function getAllModels({ category } = {}) {
         : modelsData;
       return { items: models };
     }
-
-    return res.json(); // API returns { totalCount, items }
+    const data = await res.json();
+    console.log(data);
+    return data; // API returns { totalCount, items }
   } catch (error) {
     console.error("Fetch Error:", error);
     // Fallback on network error
