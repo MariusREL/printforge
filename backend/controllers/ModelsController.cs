@@ -187,7 +187,7 @@ public sealed class ModelsController : ControllerBase
                                                       [FromForm] string? image,
                                                       [FromForm] string category,
                                                       [FromForm] DateTime? dateAdded,
-                                                      [FromForm] IFormFile stl)
+                                                      IFormFile stl)
     {
         if (stl is null || stl.Length == 0)
             return BadRequest("STL file is required.");

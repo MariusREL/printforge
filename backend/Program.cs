@@ -56,8 +56,20 @@ using (var scope = app.Services.CreateScope())
                 DateAdded = m.DateAdded
             }).ToList();
 
-            db.Models.AddRange(records);
-            await db.SaveChangesAsync();
+            // Seed with explicit IDs from JSON by temporarily enabling IDENTITY_INSERT
+            var conn = db.Database.GetDbConnection();
+            await db.Database.OpenConnectionAsync();
+            try
+            {
+                await db.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [Models] ON");
+                db.Models.AddRange(records);
+                await db.SaveChangesAsync();
+            }
+            finally
+            {
+                await db.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [Models] OFF");
+                await conn.CloseAsync();
+            }
         }
     }
 }
