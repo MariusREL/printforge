@@ -5,6 +5,14 @@
 
 
 @theme inline {
+  --animate-spin: spin 60s infinite;
+  
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
   --font-albert: var(--font-albert);
   --font-mont: var(--font-mont);
 
@@ -42,3 +50,36 @@
 html, body { margin: 0; padding: 0; }
 body { font-family: var(--font-albert); background: var(--bg); color: var(--fg); }
 h1, h2, h3, h4, h5, h6 { font-family: var(--font-mont); color: var(--heading); }
+
+@layer utilities {
+  .spin-1 {
+    animation-duration: 15s;
+  }
+  .spin-2 {
+    animation-duration: 20s;
+  }
+  .spin-3 {
+    animation-duration: 25s;
+  }
+  .spin-4 {
+    animation-duration: 30s;
+  }
+  .spin-5 {
+    animation-duration: 35s;
+  }
+  .spin-6 {
+    animation-duration: 40s;
+  }
+  .spin-7 {
+    animation-duration: 45s;
+  }
+  .spin-8 {
+    animation-duration: 50s;
+  }
+  .spin-9 {
+    animation-duration: 55s;
+  }
+  .spin-10 {
+    animation-duration: 60s;
+  }
+}
