@@ -40,7 +40,6 @@ bld/
 
 # Assets
 *.webp
-/backend/assets/webp_placeholders/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

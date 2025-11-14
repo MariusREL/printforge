@@ -15,63 +15,26 @@ builder.Services.AddSwaggerGen();
 // CORS from configuration
 builder.Services.AddConfiguredCors(builder.Configuration);
 
-// Database: SQL Server (default to localhost\\SQLEXPRESS)
+// Database: SQL Server via appsettings.json only (no hardcoded fallback)
 var connectionString = builder.Configuration.GetConnectionString("Default")
-                       ?? "Server=localhost\\SQLEXPRESS;Database=PrintforgeDb;Trusted_Connection=True;TrustServerCertificate=True;";
+                       ?? throw new InvalidOperationException("ConnectionStrings:Default is missing in configuration.");
 
-builder.Services.AddDbContext<PrintforgeDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<PrintforgeDbContext>(options => options.UseSqlServer(connectionString));
 
-// Optional: keep file catalog registration disabled; DB is source of truth now
-// var dataPath = Path.Combine(builder.Environment.ContentRootPath, "data", "models.json");
-// builder.Services.AddSingleton<IModelCatalog>(_ => new FileModelCatalog(dataPath));
+// Catalog seeded from new path backend/data/database_seeding/models.json
+var seedJsonPath = Path.Combine(builder.Environment.ContentRootPath, "data", "database_seeding", "models.json");
+builder.Services.AddSingleton<IModelCatalog>(_ => new FileModelCatalog(seedJsonPath));
+
+// Database initializer service
+builder.Services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();
 
 var app = builder.Build();
 
-// Ensure database exists and seed initial data from data/models.json if empty
+// Initialize database (drop all tables, recreate, seed from catalog & webp placeholders)
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<PrintforgeDbContext>();
-    await db.Database.EnsureCreatedAsync();
-
-    if (!await db.Models.AnyAsync())
-    {
-        var dataPath = Path.Combine(app.Environment.ContentRootPath, "data", "models.json");
-        if (File.Exists(dataPath))
-        {
-            var json = await File.ReadAllTextAsync(dataPath);
-            var items = System.Text.Json.JsonSerializer.Deserialize<List<ModelItem>>(json, new System.Text.Json.JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            }) ?? new List<ModelItem>();
-
-            var records = items.Select(m => new ModelRecord
-            {
-                Id = m.Id,
-                Name = m.Name,
-                Description = m.Description,
-                Likes = m.Likes,
-                Image = m.Image,
-                Category = m.Category,
-                DateAdded = m.DateAdded
-            }).ToList();
-
-            // Seed with explicit IDs from JSON by temporarily enabling IDENTITY_INSERT
-            var conn = db.Database.GetDbConnection();
-            await db.Database.OpenConnectionAsync();
-            try
-            {
-                await db.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [Models] ON");
-                db.Models.AddRange(records);
-                await db.SaveChangesAsync();
-            }
-            finally
-            {
-                await db.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [Models] OFF");
-                await conn.CloseAsync();
-            }
-        }
-    }
+    var initializer = scope.ServiceProvider.GetRequiredService<IDatabaseInitializer>();
+    await initializer.InitializeAsync();
 }
 
 // Configure the HTTP request pipeline.

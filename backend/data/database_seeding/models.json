@@ -1,0 +1,146 @@
+[
+    {
+        "id": 1,
+        "name": "Articulated Dragon",
+        "description": "A detailed dragon model with movable joints and wings",
+        "likes": 1847,
+        "image": "https://place-hold.it/300",
+        "category": "toys-games",
+        "dateAdded": "2023-03-15T14:30:00Z"
+    },
+    {
+        "id": 2,
+        "name": "Succulent Planter",
+        "description": "Geometric planter perfect for small succulents",
+        "likes": 456,
+        "image": "https://place-hold.it/300",
+        "category": "household",
+        "dateAdded": "2023-06-22T09:15:00Z"
+    },
+    {
+        "id": 3,
+        "name": "Cosplay Helmet",
+        "description": "Sci-fi inspired helmet for costume making",
+        "likes": 1253,
+        "image": "https://place-hold.it/300",
+        "category": "props-cosplay",
+        "dateAdded": "2023-09-05T16:45:00Z"
+    },
+    {
+        "id": 4,
+        "name": "Educational Solar System",
+        "description": "Scale model of the solar system for classroom use",
+        "likes": 892,
+        "image": "https://place-hold.it/300",
+        "category": "education",
+        "dateAdded": "2023-11-30T11:20:00Z"
+    },
+    {
+        "id": 5,
+        "name": "Abstract Sculpture",
+        "description": "Modern art piece with flowing curves",
+        "likes": 345,
+        "image": "https://place-hold.it/300",
+        "category": "art",
+        "dateAdded": "2024-01-18T13:40:00Z"
+    },
+    {
+        "id": 6,
+        "name": "Tool Holder",
+        "description": "Customizable holder for workshop tools",
+        "likes": 567,
+        "image": "https://place-hold.it/300",
+        "category": "tools",
+        "dateAdded": "2024-03-07T10:25:00Z"
+    },
+    {
+        "id": 7,
+        "name": "Fantasy Miniature",
+        "description": "Detailed warrior miniature for tabletop gaming",
+        "likes": 1456,
+        "image": "https://place-hold.it/300",
+        "category": "miniatures",
+        "dateAdded": "2024-05-12T15:50:00Z"
+    },
+    {
+        "id": 8,
+        "name": "Bracelet Maker",
+        "description": "Tool for creating custom jewelry",
+        "likes": 234,
+        "image": "https://place-hold.it/300",
+        "category": "fashion",
+        "dateAdded": "2024-07-25T08:35:00Z"
+    },
+    {
+        "id": 9,
+        "name": "Printer Upgrade Kit",
+        "description": "Enhancement parts for 3D printer performance",
+        "likes": 1789,
+        "image": "https://place-hold.it/300",
+        "category": "3d-printer",
+        "dateAdded": "2024-09-14T12:15:00Z"
+    },
+    {
+        "id": 10,
+        "name": "Garden Tool Set",
+        "description": "Collection of tools for gardening enthusiasts",
+        "likes": 445,
+        "image": "https://place-hold.it/300",
+        "category": "hobby-diy",
+        "dateAdded": "2024-11-03T17:40:00Z"
+    },
+    {
+        "id": 11,
+        "name": "Chess Set",
+        "description": "Modern interpretation of classic chess pieces",
+        "likes": 1234,
+        "image": "https://place-hold.it/300",
+        "category": "toys-games",
+        "dateAdded": "2023-02-28T14:20:00Z"
+    },
+    {
+        "id": 12,
+        "name": "Wall Organizer",
+        "description": "Modular system for wall storage",
+        "likes": 678,
+        "image": "https://place-hold.it/300",
+        "category": "household",
+        "dateAdded": "2023-05-17T11:30:00Z"
+    },
+    {
+        "id": 13,
+        "name": "Prop Sword",
+        "description": "Fantasy sword for costume play",
+        "likes": 1567,
+        "image": "https://place-hold.it/300",
+        "category": "props-cosplay",
+        "dateAdded": "2023-08-09T16:05:00Z"
+    },
+    {
+        "id": 14,
+        "name": "Molecular Model",
+        "description": "Educational model of molecular structures",
+        "likes": 789,
+        "image": "https://place-hold.it/300",
+        "category": "education",
+        "dateAdded": "2023-10-22T09:45:00Z"
+    },
+    {
+        "id": 15,
+        "name": "Geometric Wall Art",
+        "description": "Decorative wall panels with geometric patterns",
+        "likes": 890,
+        "image": "https://place-hold.it/300",
+        "category": "art",
+        "dateAdded": "2024-01-05T15:25:00Z"
+    },
+    {
+        "id": 16,
+        "name": "Screwdriver Set",
+        "description": "Custom handles for precision screwdrivers",
+        "likes": 432,
+        "image": "https://place-hold.it/300",
+        "category": "tools",
+        "dateAdded": "2024-02-19T10:50:00Z"
+    }
+]

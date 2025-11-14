@@ -177,58 +177,11 @@ public sealed class ModelsController : ControllerBase
         return Ok(result);
     }
 
-    // Upload a new model with STL file
-    // multipart/form-data fields: name, description, image (optional URL), category, dateAdded (optional ISO), stl (file)
+    // Uploads are disabled; return 410 Gone to signal deprecation
     [HttpPost]
-    [RequestSizeLimit(100_000_000)]
-    [Consumes("multipart/form-data")]
-    public async Task<ActionResult<ModelItem>> Create([FromForm] string name,
-                                                      [FromForm] string description,
-                                                      [FromForm] string? image,
-                                                      [FromForm] string category,
-                                                      [FromForm] DateTime? dateAdded,
-                                                      IFormFile stl)
+    public IActionResult Create()
     {
-        if (stl is null || stl.Length == 0)
-            return BadRequest("STL file is required.");
-
-        var record = new ModelRecord
-        {
-            Name = name,
-            Description = description,
-            Image = image ?? string.Empty,
-            Category = category,
-            DateAdded = dateAdded ?? DateTime.UtcNow,
-            Likes = 0
-        };
-
-        await _db.Models.AddAsync(record);
-        await _db.SaveChangesAsync();
-
-        await using var ms = new MemoryStream();
-        await stl.CopyToAsync(ms);
-        var blob = new ModelStlBlob
-        {
-            ModelId = record.Id,
-            FileName = string.IsNullOrWhiteSpace(stl.FileName) ? $"model-{record.Id}.stl" : stl.FileName,
-            ContentType = string.IsNullOrWhiteSpace(stl.ContentType) ? "application/sla" : stl.ContentType,
-            Data = ms.ToArray()
-        };
-        await _db.ModelStlBlobs.AddAsync(blob);
-        await _db.SaveChangesAsync();
-
-        var result = new ModelItem
-        {
-            Id = record.Id,
-            Name = record.Name,
-            Description = record.Description,
-            Likes = record.Likes,
-            Image = record.Image,
-            Category = record.Category,
-            DateAdded = record.DateAdded
-        };
-
-        return CreatedAtAction(nameof(GetById), new { id = record.Id }, result);
+        return StatusCode(StatusCodes.Status410Gone, "Uploads are disabled in this environment.");
     }
 
     // Increment like count
@@ -242,14 +195,14 @@ public sealed class ModelsController : ControllerBase
         return NoContent();
     }
 
-    // Download the first STL file for a model
-    [HttpGet("{id:int}/stl")]
-    public async Task<IActionResult> DownloadStl(int id)
+    // Return the first WebP thumbnail for a model
+    [HttpGet("{id:int}/thumbnail")]
+    public async Task<IActionResult> GetThumbnail(int id)
     {
-        var blob = await _db.ModelStlBlobs.Where(b => b.ModelId == id)
-                                          .OrderBy(b => b.Id)
-                                          .FirstOrDefaultAsync();
-        if (blob is null) return NotFound();
-        return File(blob.Data, blob.ContentType, blob.FileName);
+        var webp = await _db.ModelWebpPlaceholders.Where(b => b.ModelId == id)
+                                                  .OrderBy(b => b.Id)
+                                                  .FirstOrDefaultAsync();
+        if (webp is null) return NotFound();
+        return File(webp.Data, webp.ContentType, webp.FileName);
     }
 }
