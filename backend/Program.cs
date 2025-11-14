@@ -27,6 +27,11 @@ builder.Services.AddSingleton<IModelCatalog>(_ => new FileModelCatalog(seedJsonP
 
 // Database initializer service
 builder.Services.AddScoped<IDatabaseInitializer, DatabaseInitializer>();
+// Likes & rate limiting services
+builder.Services.AddScoped<backend.services.ILikesService, backend.services.LikesService>();
+builder.Services.AddSingleton<backend.services.ILikeRateLimiter, backend.services.LikeRateLimiter>();
+// Models query service
+builder.Services.AddScoped<backend.services.IModelsQueryService, backend.services.ModelsQueryService>();
 
 var app = builder.Build();
 

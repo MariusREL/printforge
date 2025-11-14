@@ -1,5 +1,6 @@
 using backend.models;
 using backend.database;
+using backend.services;
 
 namespace backend.controllers;
 
@@ -16,11 +17,23 @@ using Microsoft.EntityFrameworkCore;
 public sealed class ModelsController : ControllerBase
 {
     private readonly PrintforgeDbContext _db;
-    public ModelsController(PrintforgeDbContext db) => _db = db;
+    private readonly backend.services.ILikesService _likes;
+    private readonly backend.services.ILikeRateLimiter _limiter;
+    private readonly IModelsQueryService _modelsQuery;
+    public ModelsController(PrintforgeDbContext db,
+                            backend.services.ILikesService likes,
+                            backend.services.ILikeRateLimiter limiter,
+                            IModelsQueryService modelsQuery)
+    {
+        _db = db;
+        _likes = likes;
+        _limiter = limiter;
+        _modelsQuery = modelsQuery;
+    }
 
     // Enhanced listing endpoint: supports category filter, text query, sorting, and pagination.
     // Returns a paged response with totalCount and items.
-    private sealed record PagedResult<T>(int TotalCount, List<T> Items);
+    // PagedResult<T> moved to backend/models/PagedResult.cs
     
     // ## Usage examples
     /*- First page (default sort):
@@ -32,7 +45,7 @@ public sealed class ModelsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<ModelItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<object>> Get(
+    public async Task<ActionResult<PagedResult<ModelItem>>> Get(
         [FromQuery] string? category,
         [FromQuery] string? q,
         [FromQuery] int skip = 0,
@@ -40,68 +53,16 @@ public sealed class ModelsController : ControllerBase
         [FromQuery] string sort = "likes",
         [FromQuery] string order = "desc")
     {
-        // 1) Validate and normalize inputs
-        if (skip < 0) return BadRequest("Parameter 'skip' must be >= 0.");
-        if (take < 0) return BadRequest("Parameter 'take' must be >= 0.");
-        const int maxTake = 100;
-        if (take > maxTake) take = maxTake;
-
-        sort = (sort ?? "likes").Trim().ToLowerInvariant();
-        order = (order ?? "desc").Trim().ToLowerInvariant();
-        var isDesc = order == "desc";
-
-        bool IsValidSort(string s) => s is "likes" or "date" or "name";
-        bool IsValidOrder(string s) => s is "asc" or "desc";
-        if (!IsValidSort(sort)) return BadRequest("Parameter 'sort' must be one of: likes, date, name.");
-        if (!IsValidOrder(order)) return BadRequest("Parameter 'order' must be one of: asc, desc.");
-
-        var categoryNorm = string.IsNullOrWhiteSpace(category) ? null : category!.Trim();
-        var query = string.IsNullOrWhiteSpace(q) ? null : q!.Trim();
-
-        // 2) Base set
-        var queryable = _db.Models.AsQueryable();
-
-        // 3) Filters
-        if (categoryNorm is not null)
-            queryable = queryable.Where(m => m.Category != null && m.Category.Equals(categoryNorm));
-
-        if (query is not null)
-            queryable = queryable.Where(m =>
-                (m.Name != null && EF.Functions.Like(m.Name, $"%{query}%")) ||
-                (m.Description != null && EF.Functions.Like(m.Description, $"%{query}%")));
-
-        // 4) Total before paging
-        var totalCount = await queryable.CountAsync();
-
-        // 5) Sorting
-        queryable = sort switch
+        var result = await _modelsQuery.BrowseAsync(new BrowseQuery
         {
-            "likes" => isDesc ? queryable.OrderByDescending(m => m.Likes)
-                               : queryable.OrderBy(m => m.Likes),
-            "date"  => isDesc ? queryable.OrderByDescending(m => m.DateAdded)
-                               : queryable.OrderBy(m => m.DateAdded),
-            "name"  => isDesc ? queryable.OrderByDescending(m => m.Name)
-                               : queryable.OrderBy(m => m.Name),
-            _ => isDesc ? queryable.OrderByDescending(m => m.Likes)
-                        : queryable.OrderBy(m => m.Likes)
-        };
+            Category = category,
+            Q = q,
+            Skip = skip,
+            Take = take,
+            Sort = sort,
+            Order = order
+        }, HttpContext.RequestAborted);
 
-        // 6) Pagination
-        var page = await queryable.Skip(skip).Take(take)
-                                  .Select(m => new ModelItem
-                                  {
-                                      Id = m.Id,
-                                      Name = m.Name,
-                                      Description = m.Description,
-                                      Likes = m.Likes,
-                                      Image = m.Image,
-                                      Category = m.Category,
-                                      DateAdded = m.DateAdded
-                                  })
-                                  .ToListAsync();
-
-        // 7) Response
-        var result = new PagedResult<ModelItem>(totalCount, page);
         return Ok(result);
     }
 
@@ -184,14 +145,19 @@ public sealed class ModelsController : ControllerBase
         return StatusCode(StatusCodes.Status410Gone, "Uploads are disabled in this environment.");
     }
 
-    // Increment like count
+    // Increment like count (with per-client rate limiting)
     [HttpPost("{id:int}/like")]
     public async Task<IActionResult> Like(int id)
     {
-        var model = await _db.Models.FirstOrDefaultAsync(m => m.Id == id);
-        if (model is null) return NotFound();
-        model.Likes += 1;
-        await _db.SaveChangesAsync();
+        if (!_limiter.TryAcquire(HttpContext, out var retryAfter))
+        {
+            // 429 Too Many Requests with Retry-After header (in seconds)
+            Response.Headers["Retry-After"] = Math.Ceiling(retryAfter.TotalSeconds).ToString();
+            return StatusCode(StatusCodes.Status429TooManyRequests, $"Rate limit exceeded. Retry after {retryAfter.TotalMilliseconds:F0} ms");
+        }
+
+        var ok = await _likes.IncrementAsync(id, HttpContext.RequestAborted);
+        if (!ok) return NotFound();
         return NoContent();
     }
 
