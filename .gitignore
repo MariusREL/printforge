@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# JetBrains Rider / IntelliJ IDEA project files
+# These are IDE-specific, per-user settings. Should not be committed.
+.idea/
+*.sln.iml
+*.iml
