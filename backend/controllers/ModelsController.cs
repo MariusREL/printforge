@@ -20,15 +20,18 @@ public sealed class ModelsController : ControllerBase
     private readonly backend.services.ILikesService _likes;
     private readonly backend.services.ILikeRateLimiter _limiter;
     private readonly IModelsQueryService _modelsQuery;
+    private readonly IModelsCommandService _commands;
     public ModelsController(PrintforgeDbContext db,
                             backend.services.ILikesService likes,
                             backend.services.ILikeRateLimiter limiter,
-                            IModelsQueryService modelsQuery)
+                            IModelsQueryService modelsQuery,
+                            IModelsCommandService commands)
     {
         _db = db;
         _likes = likes;
         _limiter = limiter;
         _modelsQuery = modelsQuery;
+        _commands = commands;
     }
 
     // Enhanced listing endpoint: supports category filter, text query, sorting, and pagination.
@@ -138,11 +141,30 @@ public sealed class ModelsController : ControllerBase
         return Ok(result);
     }
 
-    // Uploads are disabled; return 410 Gone to signal deprecation
+    // Create a new 3D model with a WebP thumbnail
+    // Notes:
+    // - Send as multipart/form-data. Do NOT annotate IFormFile with [FromForm] (Swagger compatibility).
+    // - Likes defaults to 0; DateAdded is set by the DB (UTC).
     [HttpPost]
-    public IActionResult Create()
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(ModelItem), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Create(
+        [FromForm] string name,
+        [FromForm] string description,
+        [FromForm] string category,
+        IFormFile webp)
     {
-        return StatusCode(StatusCodes.Status410Gone, "Uploads are disabled in this environment.");
+        try
+        {
+            var item = await _commands.CreateAsync(name, description, category, webp, HttpContext.RequestAborted);
+            // Return 201 with Location header to the new resource
+            return Created($"/3dmodels/{item.Id}", item);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     // Increment like count (with per-client rate limiting)
