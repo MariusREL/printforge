@@ -1,12 +1,19 @@
 import ModelCard from "@/app/components/ModelCard";
 
 export default function ModelsGrid({ title, models }) {
-  // Ensure 'models' is treated as an array, even if it's null or undefined.
+  console.log('🔍 ModelsGrid received:', { 
+    title, 
+    models, 
+    isArray: Array.isArray(models),
+    length: models?.length,
+    firstModel: models?.[0]
+  });
+
   const modelItems = Array.isArray(models) ? models : [];
 
   if (modelItems.length === 0) {
     return (
-      <div className="mx-10">
+      <div className="mx-5">
         <h1 className="mb-8 text-3xl font-bold">{title}</h1>
         <p>No models found.</p>
       </div>
@@ -14,8 +21,8 @@ export default function ModelsGrid({ title, models }) {
   }
 
   return (
-    <div className="mx-10">
-      <h1 className="mb-8 text-3xl font-bold">{title}</h1>
+    <div className="mx-5">
+      <h1 className="mb-8 text-3xl font-bold text-center">{title}</h1>
 
       <div
         className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(230px,1fr))]"

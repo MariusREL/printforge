@@ -22,7 +22,7 @@ export default function Home() {
           </button>
         </Link>
       </div>
-      <div className="relative aspect-square  max-w-[600] lg:mt-10">
+      <div className="relative aspect-square  max-w-[600] lg:mt-10 mb-5">
         <Image
           src="/home-page-hero-img.png"
           alt="A logo"

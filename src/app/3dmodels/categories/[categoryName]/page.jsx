@@ -11,7 +11,9 @@ export default async function Categories({ params }) {
 
   // The API and fallback return an object like { items: [...] }
   const models = modelsResponse.items || [];
-
+  console.log(models);
   // No more .filter() needed! The backend did the work.
   return <ModelsGrid title={displayName} models={models} />;
 }
+
+

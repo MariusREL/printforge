@@ -10,7 +10,6 @@ export default async function page({params}){
     const {id} = await params
     const model = await getModelById(id);
 
-    // If no model is found, show the 404 page
     if (!model) {
         notFound();
     }

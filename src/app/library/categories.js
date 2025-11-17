@@ -51,6 +51,6 @@ export async function getCategoryMetaByName(name) {
 
 // Async because it may need future API enrichment
 export async function getDisplayNameFromSlug(slug) {
-  const meta = getCategoryMetaBySlug(slug);
+  const meta = await getCategoryMetaBySlug(slug);
   return meta?.displayName || meta?.name || slug;
 }

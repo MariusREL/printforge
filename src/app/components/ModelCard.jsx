@@ -34,7 +34,7 @@ export default function ModelCard({ model }) {
       aria-labelledby={`model-${model.id}-title`}
     >
       <div
-        className="max-h-[500px] max-w-[500px] mx-auto overflow-hidden transition-shadow rounded-lg shadow-md hover:shadow-lg bg-[--card-bg] text-[--card-fg] border border-[--card-border]"
+        className="max-w-[500px] mx-auto overflow-hidden transition-shadow rounded-lg shadow-md hover:shadow-lg bg-[--card-bg] text-[--card-fg] border border-[--card-border]"
         role="article"
       >
         <div className="relative aspect-square">
