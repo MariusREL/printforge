@@ -32,6 +32,8 @@ builder.Services.AddScoped<backend.services.ILikesService, backend.services.Like
 builder.Services.AddSingleton<backend.services.ILikeRateLimiter, backend.services.LikeRateLimiter>();
 // Models query service
 builder.Services.AddScoped<backend.services.IModelsQueryService, backend.services.ModelsQueryService>();
+// Models command service (create)
+builder.Services.AddScoped<backend.services.IModelsCommandService, backend.services.ModelsCommandService>();
 
 var app = builder.Build();
 
