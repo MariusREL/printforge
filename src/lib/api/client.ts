@@ -15,6 +15,8 @@ const BACKEND_URL = (
 
 
 
+// URL BUILDING UTILITIES
+ 
 
 export function buildApiUrl(path: string): string {
     const cleanPath = path.startsWith('/') ? path : `/${path}`
@@ -25,7 +27,7 @@ export function getImageUrl(modelId: number): string {
     return buildApiUrl(`/3dmodels/${modelId}/thumbnail`)
 }
 
-function buildQueryString(params: Record<string, unknown>): string {
+function buildQueryString(params: Record<string, any>): string {
     const searchParams = new URLSearchParams()
     for (const [key, value] of Object.entries(params)) {
         if (value !== undefined && value !== null && value !== ''){
@@ -71,3 +73,17 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
         )
     }
 }
+
+
+/**
+ * Fetch list of 3D models with optional filtering/sorting
+ */
+export async function fetchModels(params: ModelsQueryParams = {}): Promise <ModelsResponse>{
+    const queryString = buildQueryString(params)
+    const url = buildApiUrl(`/3dmodels${queryString}`)
+    return apiFetch<ModelsResponse>(url)
+}
+
+/**
+ * Fetch single model by ID
+ */
