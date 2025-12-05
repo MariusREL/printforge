@@ -30,7 +30,7 @@ export function getImageUrl(modelId: number): string {
 function buildQueryString(params: Record<string, any>): string {
     const searchParams = new URLSearchParams()
     for (const [key, value] of Object.entries(params)) {
-        if (value !== undefined && value !== null && value !== ''){
+        if (value !== undefined && value !== null){
             searchParams.append(key, String(value))
         }
     }
@@ -87,3 +87,34 @@ export async function fetchModels(params: ModelsQueryParams = {}): Promise <Mode
 /**
  * Fetch single model by ID
  */
+
+export async function fetchModelById(id: number): Promise<ModelItem> {
+    const url = buildApiUrl(`/3dmodels/${id}`)
+    return apiFetch<ModelItem>(url)
+}
+
+/*
+ * Fetch list of available category slugs
+ */
+
+export async function fetchCategories (query?: string): Promise<string[]>{
+    const queryString = query ? buildQueryString({query}) : ''
+    const url = buildApiUrl(`/3models/categories${queryString}`)
+    return apiFetch<string[]>(url)
+
+}
+
+
+/**
+ * Increment like count for a model
+ */
+
+export async function likeModel(modelId: number): Promise<void>{
+    const url =buildApiUrl(`3dmodels/${modelId}/like`)
+    await apiFetch<void>(url, {
+        method:'Post',
+        cache: 'no-store'
+    })
+}
+
+export const API_BASE_URL = BACKEND_URL
