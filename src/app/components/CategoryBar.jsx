@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getAllCategories } from "@/app/library/categories";
+import { getAllCategories } from "@/lib/data/categories";
 
 export default async function CategoryBar() {
   const categories = await getAllCategories(); // string[]

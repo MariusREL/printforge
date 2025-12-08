@@ -1,11 +1,9 @@
-import build from 'next/dist/build'
 import {
     ModelsResponse,
     ModelItem,
     ModelsQueryParams,
     ApiError
 } from './types'
-import { URLSearchParams } from 'next/dist/compiled/@edge-runtime/primitives/url'
 
 const BACKEND_URL = (
     process.env.BACKEND_URL ?? 
@@ -63,7 +61,7 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
         return data
     }
     catch (error){
-        console.error(`Api Netword for ${url}:`, error)
+        console.error(`API Network Error for ${url}:`, error)
         if (error instanceof ApiError){
             throw error
         }
@@ -99,20 +97,20 @@ export async function fetchModelById(id: number): Promise<ModelItem> {
 
 export async function fetchCategories (query?: string): Promise<string[]>{
     const queryString = query ? buildQueryString({query}) : ''
-    const url = buildApiUrl(`/3models/categories${queryString}`)
+    const url = buildApiUrl(`/3dmodels/categories${queryString}`)
     return apiFetch<string[]>(url)
 
 }
 
 
-/**
- * Increment like count for a model
+/*
+   Increment like count for a model
  */
 
 export async function likeModel(modelId: number): Promise<void>{
-    const url =buildApiUrl(`3dmodels/${modelId}/like`)
+    const url =buildApiUrl(`/3dmodels/${modelId}/like`)
     await apiFetch<void>(url, {
-        method:'Post',
+        method:'POST',
         cache: 'no-store'
     })
 }

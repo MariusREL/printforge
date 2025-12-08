@@ -1,5 +1,5 @@
 import CategoryBar from "@/app/components/CategoryBar";
-import { getAllCategories } from "@/app/library/categories";
+import { getAllCategories } from "@/lib/data/categories";
 
 export default async function ModelsPageWrapper({ children }) {
   const data = await getAllCategories()

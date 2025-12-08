@@ -1,4 +1,5 @@
-import { getModelById } from "@/app/library/models"
+// import { getModelById } from "@/app/library/models"
+import { getModelById } from "@/lib/data/models"
 import Image from "next/image"
 import { FaRegHeart } from "react-icons/fa6"
 import Pill from "@/app/components/Pill"

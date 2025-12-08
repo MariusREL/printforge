@@ -1,6 +1,7 @@
-import { getDisplayNameFromSlug } from "@/app/library/categories.js";
+import { getDisplayNameFromSlug } from "@/lib/data/categories";
 import ModelsGrid from "@/app/components/ModelsGrid.jsx";
-import getAllModels from "@/app/library/models.js";
+// import getAllModels from "@/app/library/models.js";
+import { getAllModels } from "@/lib/data/models";
 
 export default async function Categories({ params }) {
   const { categoryName } = await params;
